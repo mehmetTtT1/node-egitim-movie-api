@@ -1,13 +1,13 @@
-var createError = require('http-errors');
-var express = require('express');
-var path = require('path');
-var cookieParser = require('cookie-parser');
-var logger = require('morgan');
+const createError = require('http-errors');
+const express = require('express');
+const path = require('path');
+const cookieParser = require('cookie-parser');
+const logger = require('morgan');
 
-var indexRouter = require('./routes/index');
-var movieRouter = require('./routes/movie');
+const indexRouter = require('./routes/index');
+const movieRouter = require('./routes/movie');
 
-var app = express();
+const app = express();
 
 
 // db connection
@@ -38,8 +38,11 @@ app.use(function(err, req, res, next) {
   res.locals.error = req.app.get('env') === 'development' ? err : {};
 
   // render the error page
-  res.status(err.status || 500);
-  res.render('error');
+  app.use((err, req, res, next) => {
+    res.status(err.status || 500).json({
+      message: err.message
+    });
+  });
 });
 
 module.exports = app;
