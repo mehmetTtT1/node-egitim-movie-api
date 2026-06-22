@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const Movie =require('../models/Movie');
+const Director = require("../models/Director");
 
 /* GET movie listing.
 router.post('/', function(req, res, next) {
@@ -36,14 +37,40 @@ router.post('/', async (req, res) => {
 });
 
 //GET movie
-router.get('/', async (req, res, next) => {
+router.get('/', async (req, res) => {
   try {
-    const data = await Movie.find({});
+    const data = await Movie.aggregate([
+      {
+        $lookup: {
+          from: 'directors',
+          localField: 'director',
+          foreignField: '_id',
+          as: 'director',
+          pipeline: [
+            {
+              $project: {
+                name: 1,
+                surname: 1
+              }
+            }
+          ]
+        }
+      },
+      {
+        $unwind: {
+          path: "$director",
+          preserveNullAndEmptyArrays: true
+        }
+      }
+    ]);
+
     res.json(data);
   } catch (err) {
     res.json(err);
   }
 });
+
+
 //TOP 10
 router.get('/top10', async (req, res, next) => {
   try {
